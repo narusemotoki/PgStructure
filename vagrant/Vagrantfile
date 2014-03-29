@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "precise64"
+
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+
+  config.vm.provider "virtualbox" do |vm|
+    vm.customize [
+      'modifyvm', :id,
+      '--memory', '512',
+      '--cpus', '2',
+      '--name', 'PgStructure',
+    ]
+  end
+
+  config.vm.network :private_network, ip: "192.168.111.222"
+
+  config.vm.synced_folder "../pgstructure", "/srv"
+
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provision.yml"
+    ansible.inventory_path = "hosts"
+    ansible.limit = "all"
+  end
+end

@@ -1,0 +1,35 @@
+- name: Setup vagrant
+  hosts: vagrant
+  user: vagrant
+  sudo: yes
+  tasks:
+    - name: install
+      apt: pkg={{ item }} update_cache=yes
+      with_items:
+        - python-pip
+        - postgresql-9.1
+        - python-psycopg2
+
+- name: Setup Python environment
+  hosts: vagrant
+  user: vagrant
+  sudo: yes
+  tasks:
+    - name: install Python packages
+      ignore_errors: True
+      pip: name={{ item }}
+      with_items:
+        - pep8
+        - nose
+        - coverage
+        - bottle
+
+- name: Setup Postgres environment
+  hosts: vagrant
+  user: vagrant
+  sudo: yes
+  tasks:
+    - name: replace config
+      action: template src=templates/pg_hba.conf dest=/etc/postgresql/9.1/main/pg_hba.conf
+    - name: restart
+      action: service name=postgresql state=restarted
