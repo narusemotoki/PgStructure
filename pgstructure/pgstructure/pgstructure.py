@@ -23,6 +23,7 @@ from __future__ import print_function
 import argparse
 import psycopg2
 import re
+import os
 from jinja2 import Environment, FileSystemLoader
 from bottle import Bottle
 
@@ -167,9 +168,9 @@ ORDER BY pg_tables.tablename
 class Server(object):
     def __init__(self, args):
         self.args = args
-        self.environment = Environment(
-            loader=FileSystemLoader('templates', encoding='utf8')
-        )
+        self.environment = (lambda p: Environment(
+            loader=FileSystemLoader('{}/templates'.format(p), encoding='utf8')
+        ))(os.path.dirname(os.path.abspath(__file__)))
         self._app = Bottle()
         self._route()
 

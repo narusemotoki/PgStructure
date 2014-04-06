@@ -28,7 +28,10 @@ setup(
     url='http://github.com/narusemotoki/pgstructure',
     license='GPLv3',
     packages=['pgstructure'],
-    scripts=['pgstructure/pgstructure.py'],
+    entry_points={
+        'console_scripts': ['pgstructure=pgstructure:pgstructure'],
+    },
+    zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
     package_data = {
         'pgstructure': [
