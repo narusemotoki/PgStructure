@@ -16,13 +16,8 @@
   sudo: yes
   tasks:
     - name: install Python packages
-      ignore_errors: True
-      pip: name={{ item }}
-      with_items:
-        - pep8
-        - nose
-        - coverage
-        - bottle
+      ignore_errors: yes
+      shell: cd /srv && sudo pip install -r requirements.txt
 
 - name: Setup Postgres environment
   hosts: vagrant
