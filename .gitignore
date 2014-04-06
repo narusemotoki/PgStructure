@@ -1,1 +1,4 @@
 .vagrant
+*.pyc
+dist
+*.egg-info
