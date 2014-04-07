@@ -28,6 +28,8 @@ from jinja2 import Environment, FileSystemLoader
 from bottle import Bottle
 
 
+PORT = 9876
+
 FOREIGN_KEY_PARSE_RE = re.compile(
     '^FOREIGN KEY \("?(.+?)"?\) REFERENCES ' +
     '"?(.+?)"?\."?(.+?)"?\("?(.+?)"?\).*$'
@@ -234,7 +236,7 @@ class Server(object):
         })
 
     def start(self):
-        self._app.run(host='0.0.0.0', port=8765)
+        self._app.run(host='0.0.0.0', port=PORT)
 
 
 def parse_args():
