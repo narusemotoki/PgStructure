@@ -33,7 +33,7 @@ setup(
     },
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
-    package_data = {
+    package_data={
         'pgstructure': [
             'templates/*.*',
         ]
