@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='PgStructure',
-    version='0.0.1',
+    version='0.0.2',
     description='You can check the database structure of PostgreSQL',
     long_description='''
     You can check the database structure of PostgreSQL.
