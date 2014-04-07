@@ -239,7 +239,7 @@ class Server(object):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Generate reStructuredText from PostgreSQL'
+        description='You can check the database structure of PostgreSQL.'
     )
     for k, v in {
         ('--database', '--dbname', ): {
