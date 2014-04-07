@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -19,16 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from __future__ import print_function
-import argparse
 import psycopg2
 import re
-import os
-from jinja2 import Environment, FileSystemLoader
-from bottle import Bottle
 
-
-PORT = 9876
 
 FOREIGN_KEY_PARSE_RE = re.compile(
     '^FOREIGN KEY \("?(.+?)"?\) REFERENCES ' +
@@ -165,112 +157,3 @@ ORDER BY pg_tables.tablename
     def read_schema_and_tables(self):
         SQL = '''SELECT schemaname, tablename FROM pg_catalog.pg_tables;'''
         self.cursor.execute(SQL)
-
-
-class Server(object):
-    def __init__(self, args):
-        self.args = args
-        self.environment = (lambda p: Environment(
-            loader=FileSystemLoader('{}/templates'.format(p), encoding='utf8')
-        ))(os.path.dirname(os.path.abspath(__file__)))
-        self._app = Bottle()
-        self._route()
-
-    def _route(self):
-        for (path, params) in [
-                ('/', {
-                    'method': 'GET', 'callback': self.schema_list
-                }),
-                ('/schema/<schema>', {
-                    'method': 'GET', 'callback': self.table_list
-                }),
-                ('/schema/<schema>/table/<table>', {
-                    'method': 'GET', 'callback': self.column_list
-                }), ]:
-            self._app.route(path, **params)
-
-    def render(self, template, params):
-        return self.environment.get_template(template).render(**params)
-
-
-    def schema_list(self):
-        pg_structure = PgStructure(self.args)
-        schema_list = pg_structure.get_schema_list().items()
-        pg_structure.close()
-
-        return self.render('schema_list.html', {
-            'title': 'Schema list',
-            'schema_list': schema_list,
-        })
-
-    def table_list(self, schema):
-        pg_structure = PgStructure(self.args)
-        table_list = pg_structure.get_table_list(schema).items()
-        pg_structure.close()
-
-        return self.render('table_list.html', {
-            'title': 'Table list',
-            'schema': schema,
-            'table_list': table_list,
-        })
-
-    def column_list(self, schema, table):
-        pg_structure = PgStructure(self.args)
-        foreign_key_dict = pg_structure.get_foreign_key_dict(schema, table)
-
-        column_list = []
-        for column in pg_structure.get_column_list(schema, table):
-            column['foreign_key'] = self.render(
-                'foreign_key_link.html',
-                foreign_key_dict[column['column']]
-            ) if column['column'] in foreign_key_dict else None
-
-            column_list.append(column)
-        pg_structure.close()
-
-        return self.render('column_list.html', {
-            'title': 'Column list',
-            'schema': schema,
-            'table': table,
-            'column_list': column_list,
-        })
-
-    def start(self):
-        self._app.run(host='0.0.0.0', port=PORT)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description='You can check the database structure of PostgreSQL.'
-    )
-    for k, v in {
-        ('--database', '--dbname', ): {
-            'type': str,
-            'required': True,
-            'help': 'Name of your PostgreSQL',
-        },
-        ('--user', ): {
-            'type': str,
-            'help': 'User of your PostgreSQL',
-        },
-        ('--password', '--passwd', '--pass', ): {
-            'type': str,
-            'help': 'Password of user',
-        },
-        ('--host', '--hostname', ): {
-            'type': str,
-            'help': 'Hostname of your PostgreSQL',
-        },
-        ('--port', ): {
-            'type': int,
-            'default': 5432,
-            'help': 'Port number of your PostgreSQL',
-        },
-    }.items():
-        parser.add_argument(*k, **v)
-
-    return parser.parse_args()
-
-
-if __name__ == '__main__':
-    Server(parse_args()).start()
