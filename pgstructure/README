@@ -1,3 +1,19 @@
-You can check the database structure of PostgreSQL.
+===========
+PgStructure
+===========
 
-$ pgstructure.py --user {YOUR POSTGRES USER} --password {YOUR POSTGRES USER PASSWORD} --database {YOUR DATABASE} --port {YOUR POSTGRES PORT}
+You can check the database structure of PostgreSQL on WebBrowser.
+
+--------------
+How to install
+--------------
+
+`$ pip install PgStructure`
+
+----------
+How to use
+----------
+
+`$ pgstructure.py --database {YOUR DATABASE} --user {YOUR POSTGRES USER} --password {OPTIONAL:YOUR POSTGRES USER PASSWORD}  --port {OPTIONAL:YOUR POSTGRES PORT}`
+
+And access to http://localhost:9876

@@ -7,10 +7,8 @@ from setuptools import setup
 setup(
     name='PgStructure',
     version='0.0.2',
-    description='You can check the database structure of PostgreSQL',
-    long_description='''
-    You can check the database structure of PostgreSQL.
-    ''',
+    description='You can check the database structure of PostgreSQL on WebBrowser',
+    long_description=open('README').read(),
     classifiers=[
         'Topic :: Database',
         'Environment :: Web Environment',
