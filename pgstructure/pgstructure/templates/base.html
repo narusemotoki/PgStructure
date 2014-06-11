@@ -8,15 +8,13 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
   </head>
   <body class="container">
-    <div ng-controller="HeaderCtrl as header">
-      <nav class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <a class="navbar-brand" href="/">Your Postgres Structure</a>
-          </div>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">Your Postgres Structure</a>
         </div>
-      </nav>
-    </div>
+      </div>
+    </nav>
     <div>
       {% block content %}{% endblock %}
     </div>
