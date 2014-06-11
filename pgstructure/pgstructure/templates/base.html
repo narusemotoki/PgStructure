@@ -14,6 +14,19 @@
           <a class="navbar-brand" href="/">Your Postgres Structure</a>
         </div>
       </div>
+      <ul class="breadcrumb">
+      {% if schema %}
+        <li><a href="/">Home</a></li>
+        {% if table %}
+          <li><a href="/schema/{{schema}}">{{ schema }}</a></li>
+          <li class="active">{{ table }}</li>
+        {% else %}
+          <li class="active">{{ schema }}</li>
+        {% endif %}
+      {% else %}
+        <li class="active">Home</li>
+      {% endif %}
+      </ul>
     </nav>
     <div>
       {% block content %}{% endblock %}
