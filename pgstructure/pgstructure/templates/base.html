@@ -6,6 +6,36 @@
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/cupertino/jquery-ui.min.css">
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+    <script>
+     $(function() {
+       var autocomplate_items = [
+         {% for autocomplete_item in autocomplete_items %}
+           {
+             label: '{{ autocomplete_item.schema }}.{{ autocomplete_item.table }}.{{ autocomplete_item.column }}',
+             schema: '{{ autocomplete_item.schema }}',
+             table: '{{ autocomplete_item.table }}',
+             column: '{{ autocomplete_item.column }}'
+           },
+         {% endfor %}
+       ];
+
+       $('#find_by_column_name').autocomplete({
+         source: autocomplate_items,
+         autoFocus: true,
+         delay: 100,
+         minLength: 1,
+         select: function(e, ui) {
+           item = ui.item
+           if (item) {
+             document.location = '/schema/' + item.schema + '/table/' + item.table + '#' + item.column;
+           }
+         }
+       });
+     });
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-default" role="navigation">
@@ -13,6 +43,11 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="/">Your Postgres Structure</a>
         </div>
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input id="find_by_column_name" type="text" class="form-control" placeholder="Search">
+          </div>
+        </form>
       </div>
       <ul class="breadcrumb">
       {% if schema %}

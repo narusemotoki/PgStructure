@@ -50,7 +50,35 @@ class Server(object):
             self._app.route(path, **params)
 
     def render(self, template, params):
-        return self.environment.get_template(template).render(**params)
+        return self.environment.get_template(template).render(**dict(params, **{
+            'autocomplete_items': self.load_autocomplete_items()
+        }))
+
+    def load_autocomplete_items(self):
+        pg_structure = PgStructure(self.args)
+        SQL = '''
+SELECT
+    pg_tables.schemaname,
+    pg_tables.tablename,
+    pg_attribute.attname -- column name
+FROM pg_catalog.pg_tables
+LEFT JOIN pg_catalog.pg_class ON pg_class.relname = pg_tables.tablename
+LEFT JOIN pg_catalog.pg_attribute ON pg_attribute.attrelid = pg_class.oid
+WHERE
+    pg_attribute.attnum > 0 AND
+    NOT pg_attribute.attisdropped
+ORDER BY pg_attribute.attnum
+'''
+        pg_structure.cursor.execute(SQL)
+        raw = pg_structure.cursor.fetchall()
+        pg_structure.close()
+
+        return [{
+            'schema': schema,
+            'table': table,
+            'column': column,
+        } for schema, table, column in raw]
+
 
     def schema_list(self):
         pg_structure = PgStructure(self.args)
