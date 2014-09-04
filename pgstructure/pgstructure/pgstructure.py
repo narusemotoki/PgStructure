@@ -48,10 +48,9 @@ SELECT
     pg_catalog.pg_namespace.nspname,
     pg_description.description
 FROM pg_catalog.pg_namespace
-LEFT JOIN pg_catalog.pg_description ON
-    pg_description.objoid = pg_namespace.oid
+LEFT JOIN pg_catalog.pg_description ON pg_description.objoid = pg_namespace.oid
 ;
-        '''
+'''
         self.cursor.execute(SQL)
         return {
             schema: description
@@ -72,14 +71,18 @@ WHERE
         LEFT JOIN pg_catalog.pg_namespace ON
             pg_namespace.oid = pg_class.relnamespace
         WHERE
-            pg_namespace.nspname = '{schema}' AND
-            pg_class.relname = '{table}' AND
-            pg_class.relkind in ('r', 'v') LIMIT 1
+            pg_namespace.nspname = %(schema)s
+            AND pg_class.relname = %(table)s
+            AND pg_class.relkind IN ('r', 'v')
+        LIMIT 1
     ) AND
     pg_constraint.contype = 'f'
 ;
-        '''.format(schema=schema, table=table)
-        self.cursor.execute(SQL)
+'''
+        self.cursor.execute(SQL, {
+            'schema': schema,
+            'table': table,
+        })
 
         result = {}
         for k, v in self.cursor.fetchall():
@@ -102,26 +105,29 @@ SELECT
         SELECT pg_catalog.pg_get_expr(pg_attrdef.adbin, pg_attrdef.adrelid)
         FROM pg_catalog.pg_attrdef
         WHERE
-            pg_attrdef.adrelid = pg_attribute.attrelid AND
-            pg_attrdef.adnum = pg_attribute.attnum AND
-            pg_attribute.atthasdef
+            pg_attrdef.adrelid = pg_attribute.attrelid
+            AND pg_attrdef.adnum = pg_attribute.attnum
+            AND pg_attribute.atthasdef
     ) AS modifiers,
     pg_description.description
 FROM pg_catalog.pg_tables
 LEFT JOIN pg_catalog.pg_class ON pg_class.relname = pg_tables.tablename
 LEFT JOIN pg_catalog.pg_attribute ON pg_attribute.attrelid = pg_class.oid
 LEFT JOIN pg_catalog.pg_description ON
-    pg_description.objsubid = pg_attribute.attnum AND
-    pg_description.objoid = pg_class.oid
+    pg_description.objsubid = pg_attribute.attnum
+    AND pg_description.objoid = pg_class.oid
 WHERE
-    pg_tables.schemaname = '{schema}' AND
-    pg_tables.tablename = '{table}' AND
-    pg_attribute.attnum > 0 AND
-    NOT pg_attribute.attisdropped
+    pg_tables.schemaname = %(schema)
+    AND pg_tables.tablename = %(table)
+    AND pg_attribute.attnum > 0
+    AND NOT pg_attribute.attisdropped
 ORDER BY pg_attribute.attnum
 ;
-        '''.format(schema=schema, table=table)
-        self.cursor.execute(SQL)
+'''
+        self.cursor.execute(SQL, {
+            'schema': schema,
+            'table': table,
+        })
         return [{
             'column': column,
             'is_not_null': is_not_null,
@@ -138,22 +144,27 @@ ORDER BY pg_attribute.attnum
     def get_table_list(self, schema):
         SQL = '''
 SELECT
-    pg_tables.tablename, pg_description.description
+    pg_tables.tablename,
+    pg_description.description
 FROM pg_catalog.pg_tables
 LEFT JOIN pg_catalog.pg_class ON pg_class.relname = pg_tables.tablename
 LEFT JOIN pg_catalog.pg_description ON
-    pg_class.oid = pg_description.objoid AND
-    pg_description.objsubid = 0
-WHERE pg_tables.schemaname = '{}'
+    pg_class.oid = pg_description.objoid
+    AND pg_description.objsubid = 0
+WHERE pg_tables.schemaname = %(schema)s
 ORDER BY pg_tables.tablename
 ;
-        '''.format(schema)
-        self.cursor.execute(SQL)
+'''
+        self.cursor.execute(SQL, {
+            'schema': schema,
+        })
         return {
             table: description
             for table, description in self.cursor.fetchall()
         }
 
     def read_schema_and_tables(self):
-        SQL = '''SELECT schemaname, tablename FROM pg_catalog.pg_tables;'''
+        SQL = '''
+SELECT schemaname, tablename FROM pg_catalog.pg_tables;
+'''
         self.cursor.execute(SQL)
